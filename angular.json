@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "oss-map": {
+    "map-app": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/oss-map",
+            "outputPath": "dist/map-app",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -22,9 +22,17 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "/assets/"
+              }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "node_modules/leaflet-draw/dist/leaflet.draw.css",
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -57,13 +65,15 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+          },
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "oss-map:build:production"
+              "browserTarget": "map-app:build:production"
             },
             "development": {
-              "browserTarget": "oss-map:build:development"
+              "browserTarget": "map-app:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -71,7 +81,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "oss-map:build"
+            "browserTarget": "map-app:build"
           }
         },
         "test": {
@@ -84,12 +94,23 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-              "src/styles.css"
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "node_modules/leaflet/dist/leaflet.css",
+              "src/styles.css",
+              "node_modules/flatpickr/dist/flatpickr.min.css"
+
             ],
-            "scripts": []
+            "scripts": [              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
           }
         }
       }

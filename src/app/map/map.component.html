@@ -1,1 +1,206 @@
-<p>map works!</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map Application</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/13.3.2/angular-material.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Angular Material CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/@angular/core@13.3.2/bundles/core.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@angular/common@13.3.2/bundles/common.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@angular/forms@13.3.2/bundles/forms.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@angular/material@13.3.2/bundles/material.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@angular/cdk@13.3.2/bundles/cdk.umd.js"></script>
+  <style>
+    /* Add your custom styles here */
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .map-container {
+      height: 500px;
+      width: 100%;
+      background-color: #e0e0e0; /* Placeholder for map background */
+    }
+    .sidebar {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+    }
+    .hidden {
+      display: none;
+    }
+    .fetch-btn, .toggle-btn, .draw-polygon-btn, .download-btn, .show-btn {
+      margin-top: 10px;
+    }
+    .loading-indicator {
+      color: #007bff;
+    }
+    .product-name {
+      font-weight: bold;
+    }
+    .product-details {
+      margin-left: 10px;
+    }
+    .toggle-btn {
+      margin: 10px;
+    }
+    body {
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+<div id="button-container"></div> <!-- Container for dynamically added buttons -->
+<div class="container">
+  <div class="dropdown">
+
+    <button
+      (click)="showChartAlert()"
+      style="
+        background-color: #007bff; /* Blue background */
+        color: white; /* White text */
+        border: none; /* Remove border */
+        padding: 10px 20px; /* Add padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Inline-block element */
+        font-size: 16px; /* Font size */
+        margin: 4px 2px; /* Margin around button */
+        cursor: pointer; /* Pointer cursor on hover */
+        border-radius: 5px; /* Rounded corners */
+        transition: background-color 0.3s ease; /* Smooth background color transition */
+    "
+      onmouseover="this.style.backgroundColor='#0056b3';"
+      onmouseout="this.style.backgroundColor='#007bff';"
+    >
+      Show Chart
+    </button>
+
+
+  </div>
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
+
+  <div class="sidebar" [class.hidden]="isSidebarHidden">
+    <mat-tab-group>
+      <mat-tab label="Products">
+
+        <mat-form-field appearance="fill">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" placeholder="Choose a start date" [min]="minDate" [max]="maxDate">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" placeholder="Choose an end date" [min]="minDate" [max]="maxDate">
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Collection Type</mat-label>
+          <mat-select id="collectionType" [(ngModel)]="collectionType" (selectionChange)="onCollectionTypeChange()">
+            <mat-option value="1">Sentinel-1</mat-option>
+            <mat-option value="2">Sentinel-2</mat-option>
+            <mat-option value="3">Sentinel-3</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <ng-container [ngSwitch]="collectionType">
+          <mat-form-field *ngSwitchCase="'1'" appearance="fill">
+            <mat-label>Product Type for Sentinel-1</mat-label>
+            <mat-select id="sentinel1ProductType" [(ngModel)]="sentinel1ProductType">
+              <mat-option value="RAW">RAW</mat-option>
+              <mat-option value="GRD">GRD</mat-option>
+              <mat-option value="GRD-COG">GRD-COG</mat-option>
+              <mat-option value="OCN">OCN</mat-option>
+              <mat-option value="SLC">SLC</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field *ngSwitchCase="'2'" appearance="fill">
+            <mat-label>Product Type for Sentinel-2</mat-label>
+            <mat-select id="sentinel2ProductType" [(ngModel)]="sentinel2ProductType">
+              <mat-option value="S2MSI2A">S2MSI2A</mat-option>
+              <mat-option value="S2MSI1C">S2MSI1C</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field *ngSwitchCase="'3'" appearance="fill">
+            <mat-label>Product Type for Sentinel-3</mat-label>
+            <mat-select id="sentinel3ProductType" [(ngModel)]="sentinel3ProductType">
+              <!-- Add Sentinel-3 options here -->
+              <mat-option value="OL_1_EFR">OL_1_EFR</mat-option>
+              <mat-option value="OL_1_ERR">OL_1_ERR</mat-option>
+              <mat-option value="OL_2_LFR">OL_2_LFR</mat-option>
+              <mat-option value="OL_2_LRR">OL_2_LRR</mat-option>
+              <mat-option value="OL_2_WFR">OL_2_WFR</mat-option>
+              <mat-option value="OL_2_WRR">OL_2_WRR</mat-option>
+              <mat-option value="SR_1_SRA_A_">SR_1_SRA_A_</mat-option>
+              <mat-option value="SR_1_SRA_BS">SR_1_SRA_BS</mat-option>
+              <mat-option value="SR_1_SRA___">SR_1_SRA</mat-option>
+              <mat-option value="SR_2_LAN_HY">SR_2_LAN_HY</mat-option>
+              <mat-option value="SR_2_LAN_LI">SR_2_LAN_LI</mat-option>
+              <mat-option value="SR_2_LAN_SI">SR_2_LAN_SI</mat-option>
+              <mat-option value="SR_2_LAN___">SR_2_LAN</mat-option>
+              <mat-option value="SR_2_WAT___">SR_2_WAT</mat-option>
+              <mat-option value="SY_2_AOD___">SY_2_AOD</mat-option>
+              <mat-option value="SY_2_SYN___">SY_2_SYN</mat-option>
+              <mat-option value="SY_2_V10___">SY_2_V10</mat-option>
+              <mat-option value="SY_2_VG1___">SY_2_VG1</mat-option>
+              <mat-option value="SY_2_VGP___">SY_2_VGP</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </ng-container>
+
+        <button class="fetch-btn" (click)="fetchDataForDrawnShapes()">
+          <i class="fas fa-sync-alt"></i> Fetch Data
+        </button>
+
+        <h2>Products Available ({{ productCount }}):</h2>
+
+        <div *ngIf="isLoading" class="loading-indicator">
+          Loading data, please wait...
+        </div>
+
+        <ul>
+          <li *ngFor="let product of fetchedProductNames">
+            <span class="product-name">{{ product.name }}</span>
+            <span class="product-details">
+    Size: {{ product.contentLength }},<br>
+    Publish Date: {{ product.publish_date }}
+  </span>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+              <button class="draw-polygon-btn" (click)="drawPolygonFromCoords(product.id, product.coordinates)" title="Draw Polygon" style="display: flex; align-items: center;">
+                <i class="fas fa-draw-polygon"></i> Zoom To Image
+              </button>
+              <button class="show-btn" *ngIf="collectionType === '2' && sentinel2ProductType === 'S2MSI2A'"
+                      (click)="showImage(product.name, product.id)" title="Show Image" style="display: flex; align-items: center;">
+                <i class="fas fa-image"></i> Show Image
+              </button>
+              <button class="download-btn" (click)="downloadProduct(product.id)" style="display: flex; align-items: center;">
+                <i class="fas fa-download"></i> Download
+              </button>
+            </div>
+          </li>
+
+        </ul>
+      </mat-tab >
+    </mat-tab-group>
+  </div>
+
+  <button class="toggle-btn" (click)="toggleSidebar()" style="margin-right: -1px">&#9664;</button>
+</div>
+</body>
+</html>

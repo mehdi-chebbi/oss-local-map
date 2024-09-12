@@ -1,0 +1,67 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 0.3rem; /* Reduced padding */
+  position: relative;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Distributes space between logo and title */
+}
+
+.logo-text {
+  margin-left: 10px; /* Adjust the spacing as needed */
+  font-size: 24px;   /* Adjust the font size as needed */
+}
+.logo-container {
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+}
+.logo {
+  height: 50px;
+}
+
+.title-container {
+  flex-grow: 1;
+  text-align: center;
+  margin-right: 400px;
+}
+
+nav {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+nav button {
+  margin: 0 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #0056b3;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+nav button:hover {
+  background-color: #003d80;
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+}
+
+footer {
+  background-color: #f8f9fa;
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+}
